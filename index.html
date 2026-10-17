@@ -201,7 +201,7 @@
       </div>
       <div class="sound-grid" id="sound-grid">
         <button class="sound-button" type="button" data-sound="hammer" aria-label="Play hammer sound">
-          <span class="sound-icon" aria-hidden="true">🔨</span><span><span class="sound-label">Hammer</span><span class="sound-sub"></br>Tap to play</span></span>
+          <span class="sound-icon" aria-hidden="true">🔨</span><span><span class="sound-label">Hammer</span><span class="sound-sub">Tap to play</span></span>
         </button>
         <button class="sound-button" type="button" data-sound="run" aria-label="Play run sound">
           <span class="sound-icon" aria-hidden="true">🏃</span><span><span class="sound-label">Run</span><span class="sound-sub"></br>Tap to play</span></span>
@@ -224,13 +224,22 @@
         <button class="sound-button" type="button" data-sound="yawn" aria-label="Play yawn sound">
           <span class="sound-icon" aria-hidden="true">🥱</span><span><span class="sound-label">Yawn</span><span class="sound-sub"></br>Tap to play</span></span>
         </button>
+        <button class="sound-button" type="button" data-sound="laugh" aria-label="Play laugh sound">
+          <span class="sound-icon" aria-hidden="true">🤣</span><span><span class="sound-label">Laugh</span><span class="sound-sub"></br>Tap to play</span></span>
+        </button>
+        <button class="sound-button" type="button" data-sound="sing" aria-label="Play sing sound">
+          <span class="sound-icon" aria-hidden="true">🎤</span><span><span class="sound-label">Sing</span><span class="sound-sub"></br>Tap to play</span></span>
+        </button>
+        <button class="sound-button" type="button" data-sound="bounce" aria-label="Play bouncing sound">
+          <span class="sound-icon" aria-hidden="true">🏀</span><span><span class="sound-label">Bounce</span><span class="sound-sub"></br>Tap to play</span></span>
+        </button>
       </div>
       <p class="status" id="status" role="status" aria-live="polite">Ready when you are.</p>
     </section>
   </main>
 
   <script>
-    const soundNames = ["hammer", "run", "slice", "swim", "eat", "photograph", "sneeze", "yawn"];
+    const soundNames = ["hammer", "run", "slice", "swim", "eat", "photograph", "sneeze", "yawn", "laugh", "sing", "bounce"];
     const audioPlayers = new Map();
     const soundButtons = [...document.querySelectorAll("[data-sound]")];
     const status = document.getElementById("status");
@@ -250,8 +259,16 @@
     }
 
     async function playSound(name) {
+      // Stop every other sound before starting the selected one.
+      audioPlayers.forEach((audio, otherName) => {
+        if (otherName !== name) {
+          audio.pause();
+          audio.currentTime = 0;
+        }
+      });
+
       const player = getPlayer(name);
-      // Restart the sound if it is tapped again before it finishes.
+      // Restart the selected sound if it is tapped again before it finishes.
       player.pause();
       player.currentTime = 0;
       soundButtons.forEach(button => {
@@ -280,6 +297,13 @@
     });
 
     randomButton.addEventListener("click", () => {
+      // Stop any currently playing sound as soon as random selection is requested.
+      audioPlayers.forEach(audio => {
+        audio.pause();
+        audio.currentTime = 0;
+      });
+      soundButtons.forEach(button => button.classList.remove("playing"));
+
       let choices = soundNames.filter(name => name !== lastSound);
       if (!choices.length) choices = soundNames;
       const selected = choices[Math.floor(Math.random() * choices.length)];
